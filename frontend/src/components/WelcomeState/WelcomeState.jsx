@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
+import LineWaves from '../LineWaves/LineWaves'
 import './WelcomeState.css'
 
 /* ── Animated mini sparkline SVG ── */
@@ -82,6 +83,25 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
   return (
     <div className="ws-root">
       
+      {/* ── Background Animation ── */}
+      <div className="ws-bg-animation">
+        <LineWaves
+          speed={0.2}
+          innerLineCount={25}
+          outerLineCount={30}
+          warpIntensity={1.2}
+          rotation={0}
+          edgeFadeWidth={0.2}
+          colorCycleSpeed={0.5}
+          brightness={0.15}
+          color1="#ffffff"
+          color2="#aaaaaa"
+          color3="#555555"
+          enableMouseInteraction={true}
+          mouseInfluence={2.5}
+        />
+      </div>
+
       {/* ── Section 1: Hero Sticky Sequence ── */}
       <div className="ws-hero-container" ref={heroRef}>
         <div className="ws-hero-sticky">
