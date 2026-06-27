@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: stock-analysis-api
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: oregon
+    plan: free
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: FMP_API_KEY
+        sync: false # Must be set in Render dashboard
+      - key: GROQ_API_KEY
+        sync: false # Must be set in Render dashboard

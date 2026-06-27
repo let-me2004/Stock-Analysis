@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --color-invega-bg: #000000;
+  --color-invega-accent: #FFFFFF;
+  --color-invega-gold: #FFFFFF;
+  --font-sans: var(--font-outfit), sans-serif;
+  --font-mono: var(--font-space-mono), monospace;
+}
+
+@layer base {
+  :root {
+    --background: #000000;
+    --foreground: #ffffff;
+    --primary: #ffffff;
+    --primary-foreground: #000000;
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --border: #27272a;
+  }
+}
+
+@layer components {
+  /* Typography System */
+  .typo-h1 {
+    @apply text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tighter;
+  }
+  .typo-h2 {
+    @apply text-2xl md:text-3xl font-bold uppercase tracking-widest;
+  }
+  .typo-body {
+    @apply text-lg md:text-xl text-white/70 leading-relaxed font-sans;
+  }
+  .typo-label {
+    @apply font-mono text-xs uppercase tracking-[0.2em] text-white/50 font-bold;
+  }
+  .typo-data {
+    @apply font-mono text-xl md:text-2xl font-light text-white;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+  font-family: var(--font-outfit), sans-serif;
+}

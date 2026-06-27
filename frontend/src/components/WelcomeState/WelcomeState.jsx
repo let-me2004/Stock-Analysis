@@ -36,13 +36,9 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
   const heroScale = useTransform(scrollYProgress, [0, 0.25], [1, 0.95])
   const heroY = useTransform(scrollYProgress, [0, 0.25], [0, -100])
 
-  // Search portal sequence
-  const searchOpacity = useTransform(scrollYProgress, [0.15, 0.4], [0, 1])
-  const searchScale = useTransform(scrollYProgress, [0.15, 0.4], [0.9, 1])
-  const searchY = useTransform(scrollYProgress, [0.15, 0.4], [30, 0])
 
-  // Background orb animations
-  const orbY = useTransform(scrollYProgress, [0, 1], [0, 300])
+
+
   
   useEffect(() => {
     if (!query.trim()) { setSuggestions([]); return }
@@ -73,14 +69,14 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
   ]
 
   const pillars = [
-    { icon: '🏢', title: 'Business Profile', desc: 'Company overview, sector positioning & competitive landscape' },
-    { icon: '📊', title: 'Revenue & P&L', desc: 'Revenue trends, gross margins, net income trajectory' },
-    { icon: '🏰', title: 'Moat Analysis', desc: 'Competitive advantages, switching costs & network effects' },
-    { icon: '⚖️', title: 'SWOT Analysis', desc: 'AI-powered strengths, weaknesses, opportunities & threats' },
-    { icon: '💰', title: 'Capital Allocation', desc: 'Buybacks, dividends, R&D spend & reinvestment rates' },
-    { icon: '📈', title: 'Profitability', desc: 'ROE, ROIC, ROCE & margin expansion analysis' },
-    { icon: '🏦', title: 'Balance Sheet', desc: 'Debt structure, liquidity ratios & financial health' },
-    { icon: '🎯', title: 'Valuation', desc: 'DCF, multiples, intrinsic value & margin of safety' },
+    { title: 'Business Profile', desc: 'Company overview, sector positioning & competitive landscape' },
+    { title: 'Revenue & P&L', desc: 'Revenue trends, gross margins, net income trajectory' },
+    { title: 'Moat Analysis', desc: 'Competitive advantages, switching costs & network effects' },
+    { title: 'SWOT Analysis', desc: 'AI-powered strengths, weaknesses, opportunities & threats' },
+    { title: 'Capital Allocation', desc: 'Buybacks, dividends, R&D spend & reinvestment rates' },
+    { title: 'Profitability', desc: 'ROE, ROIC, ROCE & margin expansion analysis' },
+    { title: 'Balance Sheet', desc: 'Debt structure, liquidity ratios & financial health' },
+    { title: 'Valuation', desc: 'DCF, multiples, intrinsic value & margin of safety' },
   ]
 
   return (
@@ -90,29 +86,23 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
       <div className="ws-hero-container" ref={heroRef}>
         <div className="ws-hero-sticky">
           
-          <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
-            <div style={{ position: 'absolute', top: '10%', left: '20%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(10,132,255,0.4) 0%, transparent 70%)', filter: 'blur(80px)' }} />
-            <div style={{ position: 'absolute', bottom: '20%', right: '15%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(94,92,230,0.3) 0%, transparent 70%)', filter: 'blur(100px)' }} />
-          </motion.div>
+
 
           {/* Title that fades out */}
           <motion.div 
             className="ws-hero-title-wrapper"
             style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
           >
-            <div className="ws-hero-badge">Institutional Grade Research</div>
+            <div className="ws-hero-badge">Institutional Equity Intelligence</div>
             <h1 className="ws-hero-title">
-              Analyze Any Stock
-              <span>Like a Professional.</span>
+              Precision.
+              <span>Signal. Edge.</span>
             </h1>
           </motion.div>
 
-          {/* Search portal that fades in */}
+          {/* Search */}
           <div className="ws-search-container">
-            <motion.div 
-              className="ws-search-wrapper"
-              style={{ opacity: searchOpacity, scale: searchScale, y: searchY }}
-            >
+            <div className="ws-search-wrapper">
               <form className="ws-search-form" onSubmit={(e) => {
                 e.preventDefault()
                 if (query.trim()) onSearch(query.trim())
@@ -151,7 +141,7 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
                   </div>
                 )}
               </form>
-            </motion.div>
+            </div>
           </div>
 
         </div>
@@ -166,8 +156,8 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
           viewport={{ root: scrollContainerRef, once: true, margin: "-100px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="ws-section-label">Trending Ecosystem</div>
-          <h2 className="ws-section-title">The pulse of the markets.</h2>
+          <div className="ws-section-label">Market Coverage</div>
+          <h2 className="ws-section-title">Instruments we track.</h2>
         </motion.div>
 
         <div className="ws-trending-grid">
@@ -184,7 +174,7 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
               <div className="ws-trending-sym">{s.sym}</div>
               <div className="ws-trending-name">{s.name}</div>
               <div className="ws-trending-chart">
-                <Sparkline data={s.spark} color="#0A84FF" width={100} height={36} />
+                <Sparkline data={s.spark} color="rgba(255,255,255,0.60)" width={100} height={36} />
               </div>
             </motion.button>
           ))}
@@ -200,8 +190,8 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
           viewport={{ root: scrollContainerRef, once: true, margin: "-100px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="ws-section-label">14-Pillar Analysis</div>
-          <h2 className="ws-section-title">Deep dive, simplified.</h2>
+          <div className="ws-section-label">Analysis Framework</div>
+          <h2 className="ws-section-title">14 pillars. Zero noise.</h2>
         </motion.div>
 
         <div className="ws-pillars-grid">
@@ -214,7 +204,6 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
               viewport={{ root: scrollContainerRef, once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: (i % 4) * 0.1, ease: "easeOut" }}
             >
-              <div className="ws-pillar-icon">{p.icon}</div>
               <div className="ws-pillar-title">{p.title}</div>
               <div className="ws-pillar-desc">{p.desc}</div>
             </motion.div>

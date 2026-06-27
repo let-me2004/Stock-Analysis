@@ -1,0 +1,647 @@
+﻿diff --git a/frontend/package.json b/frontend/package.json
+index 7e118ee..fb6c870 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -10,13 +10,18 @@
+     "preview": "vite preview"
+   },
+   "dependencies": {
++    "@gsap/react": "^2.1.2",
++    "@react-three/drei": "^10.7.7",
++    "@react-three/fiber": "^9.6.1",
+     "framer-motion": "^12.40.0",
++    "gsap": "^3.15.0",
+     "html2canvas": "^1.4.1",
+     "jspdf": "^4.2.1",
+     "react": "^19.2.6",
+     "react-dom": "^19.2.6",
+     "react-to-print": "^3.3.0",
+-    "recharts": "^3.8.1"
++    "recharts": "^3.8.1",
++    "three": "^0.185.0"
+   },
+   "devDependencies": {
+     "@eslint/js": "^10.0.1",
+@@ -28,5 +33,8 @@
+     "eslint-plugin-react-refresh": "^0.5.2",
+     "globals": "^17.6.0",
+     "vite": "^5.4.21"
++  },
++  "overrides": {
++    "esbuild": "0.25.0"
+   }
+ }
+diff --git a/frontend/src/App.jsx b/frontend/src/App.jsx
+index ee2f421..f866ee9 100644
+--- a/frontend/src/App.jsx
++++ b/frontend/src/App.jsx
+@@ -18,6 +18,7 @@ import Valuation from './components/sections/Valuation'
+ import PeerComparison from './components/sections/PeerComparison'
+ import StockHistory from './components/sections/StockHistory'
+ import WelcomeState from './components/WelcomeState/WelcomeState'
++import ParallaxBackground from './components/ParallaxBackground/ParallaxBackground'
+ import { useStock } from './hooks/useStock'
+ import { exportToPDF } from './utils/pdfExport'
+ 
+@@ -74,6 +75,7 @@ export default function App() {
+ 
+   return (
+     <div className="app-root">
++      {!ticker && <ParallaxBackground />}
+       <Header onSearch={handleSearch} onExport={handleExport} ticker={ticker} />
+       <div className="app-body">
+         <Sidebar currentTicker={ticker} onSelectTicker={handleSearch} />
+diff --git a/frontend/src/components/WelcomeState/WelcomeState.css b/frontend/src/components/WelcomeState/WelcomeState.css
+index dddb6fc..9d816d2 100644
+--- a/frontend/src/components/WelcomeState/WelcomeState.css
++++ b/frontend/src/components/WelcomeState/WelcomeState.css
+@@ -1,10 +1,11 @@
+ .ws-root {
+-  background-color: #000;
+   color: #fff;
++  font-family: "Georgia", serif;
++  position: relative;
++  z-index: 1; /* Keep it above the WebGL Parallax canvas */
+   height: 100%;
+   overflow-y: auto;
+   overflow-x: hidden;
+-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+ }
+ 
+ /* Hero Sticky Sequence */
+@@ -22,7 +23,8 @@
+   align-items: center;
+   justify-content: center;
+   overflow: hidden;
+-  background: radial-gradient(circle at 50% 50%, #111 0%, #000 80%);
++  /* NO BACKGROUND HERE - Let the 3D Parallax shine through */
++  background: transparent;
+ }
+ 
+ .ws-hero-title-wrapper {
+@@ -35,29 +37,31 @@
+ }
+ 
+ .ws-hero-badge {
+-  font-size: 12px;
+-  font-weight: 600;
+-  letter-spacing: 0.2em;
+-  color: #888;
++  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
++  font-size: 13px;
++  font-weight: 700;
++  letter-spacing: 0.3em;
++  color: #D4AF37; /* Imperial Gold */
+   margin-bottom: 24px;
+   text-transform: uppercase;
+ }
+ 
+ .ws-hero-title {
+   font-size: clamp(48px, 8vw, 96px);
+-  font-weight: 700;
++  font-weight: 400;
+   line-height: 1.05;
+-  letter-spacing: -0.02em;
++  letter-spacing: 0.02em;
+   margin: 0;
+-  background: linear-gradient(180deg, #fff 0%, #888 100%);
++  background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
++  text-transform: uppercase; /* Roman aesthetic */
+ }
+ 
+ .ws-hero-title span {
+   display: block;
+-  background: linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%);
++  background: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 100%);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+@@ -89,7 +93,7 @@
+   left: 20px;
+   top: 50%;
+   transform: translateY(-50%);
+-  color: #666;
++  color: #D4AF37;
+   pointer-events: none;
+   z-index: 2;
+ }
+@@ -97,22 +101,23 @@
+ .ws-search-input {
+   width: 100%;
+   padding: 20px 140px 20px 56px;
++  font-family: "Georgia", serif;
+   font-size: 18px;
+-  background: rgba(255, 255, 255, 0.05);
++  background: rgba(0, 0, 0, 0.4);
+   backdrop-filter: blur(20px);
+   -webkit-backdrop-filter: blur(20px);
+-  border: 1px solid rgba(255, 255, 255, 0.1);
+-  border-radius: 20px;
+-  color: #fff;
++  border: 1px solid rgba(212, 175, 55, 0.3);
++  border-radius: 8px; /* Sharper corners for Roman feel */
++  color: #F3E5AB;
+   outline: none;
+   transition: all 0.3s ease;
+   box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+ }
+ 
+ .ws-search-input:focus {
+-  background: rgba(255, 255, 255, 0.08);
+-  border-color: rgba(255, 255, 255, 0.2);
+-  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.3), 0 20px 40px rgba(0,0,0,0.5);
++  background: rgba(0, 0, 0, 0.6);
++  border-color: rgba(212, 175, 55, 0.8);
++  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2), 0 20px 40px rgba(0,0,0,0.5);
+ }
+ 
+ .ws-search-btn {
+@@ -121,12 +126,15 @@
+   top: 50%;
+   transform: translateY(-50%);
+   padding: 12px 28px;
+-  font-size: 15px;
+-  font-weight: 600;
+-  background: #fff !important;
++  font-size: 14px;
++  font-family: -apple-system, sans-serif;
++  text-transform: uppercase;
++  letter-spacing: 0.1em;
++  font-weight: 700;
++  background: linear-gradient(135deg, #D4AF37 0%, #aa8c2c 100%) !important;
+   color: #000 !important;
+   border: none;
+-  border-radius: 14px;
++  border-radius: 6px;
+   cursor: pointer;
+   transition: transform 0.2s ease, opacity 0.2s ease;
+   z-index: 2;
+@@ -141,13 +149,14 @@
+   position: absolute;
+   top: calc(100% + 8px);
+   left: 0; right: 0;
+-  background: rgba(20, 20, 20, 0.85);
++  background: rgba(0, 0, 0, 0.85);
+   backdrop-filter: blur(30px);
+   -webkit-backdrop-filter: blur(30px);
+-  border: 1px solid rgba(255,255,255,0.1);
+-  border-radius: 16px;
++  border: 1px solid rgba(212, 175, 55, 0.3);
++  border-radius: 8px;
+   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+   overflow: hidden;
++  font-family: -apple-system, sans-serif;
+ }
+ 
+ .ws-search-dd-item {
+@@ -155,16 +164,16 @@
+   align-items: center;
+   padding: 16px 20px;
+   cursor: pointer;
+-  border-bottom: 1px solid rgba(255,255,255,0.05);
++  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+   transition: background 0.2s;
+ }
+-.ws-search-dd-item:hover { background: rgba(255,255,255,0.1); }
++.ws-search-dd-item:hover { background: rgba(212, 175, 55, 0.15); }
+ .ws-search-dd-item:last-child { border-bottom: none; }
+-.ws-search-dd-item.muted { justify-content: center; color: #888; font-size: 14px; cursor: default; }
++.ws-search-dd-item.muted { justify-content: center; color: #D4AF37; font-size: 14px; cursor: default; }
+ 
+-.ws-dd-sym { font-weight: 700; width: 80px; }
++.ws-dd-sym { font-weight: 700; width: 80px; color: #F3E5AB; }
+ .ws-dd-name { color: #aaa; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+-.ws-dd-exch { font-size: 11px; color: #666; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; }
++.ws-dd-exch { font-size: 11px; color: #000; background: #D4AF37; padding: 4px 8px; border-radius: 4px; font-weight: 600; }
+ 
+ /* Normal flow sections */
+ .ws-section {
+@@ -179,50 +188,23 @@
+ }
+ 
+ .ws-section-label {
++  font-family: -apple-system, sans-serif;
+   font-size: 14px;
+   font-weight: 600;
+-  color: #0A84FF;
+-  letter-spacing: 0.1em;
++  color: #D4AF37;
++  letter-spacing: 0.2em;
+   text-transform: uppercase;
+   margin-bottom: 16px;
+ }
+ 
+ .ws-section-title {
+   font-size: 40px;
+-  font-weight: 700;
+-  letter-spacing: -0.02em;
++  font-weight: 400;
++  letter-spacing: 0.05em;
+   margin: 0;
++  text-transform: uppercase;
+ }
+ 
+-/* Trending Grid */
+-.ws-trending-grid {
+-  display: grid;
+-  grid-template-columns: repeat(3, 1fr);
+-  gap: 20px;
+-}
+-
+-.ws-trending-card {
+-  background: rgba(255,255,255,0.03);
+-  border: 1px solid rgba(255,255,255,0.08);
+-  border-radius: 24px;
+-  padding: 24px;
+-  cursor: pointer;
+-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+-  text-align: left;
+-  color: #fff;
+-}
+-
+-.ws-trending-card:hover {
+-  background: rgba(255,255,255,0.06);
+-  border-color: rgba(255,255,255,0.15);
+-  transform: translateY(-4px);
+-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+-}
+-
+-.ws-trending-sym { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #fff; }
+-.ws-trending-name { font-size: 13px; color: #888; }
+-.ws-trending-chart { margin-top: 24px; }
+-
+ /* Pillars Grid */
+ .ws-pillars-grid {
+   display: grid;
+@@ -231,18 +213,20 @@
+ }
+ 
+ .ws-pillar-card {
+-  background: rgba(255,255,255,0.02);
+-  border: 1px solid rgba(255,255,255,0.05);
+-  border-radius: 24px;
++  background: rgba(0, 0, 0, 0.4);
++  backdrop-filter: blur(10px);
++  border: 1px solid rgba(212, 175, 55, 0.2);
++  border-radius: 8px;
+   padding: 32px 24px;
+   text-align: center;
+   transition: all 0.3s ease;
+ }
+ 
+ .ws-pillar-card:hover {
+-  background: rgba(255,255,255,0.05);
+-  border-color: rgba(255,255,255,0.1);
+-  transform: translateY(-2px);
++  background: rgba(0, 0, 0, 0.6);
++  border-color: rgba(212, 175, 55, 0.5);
++  transform: translateY(-4px);
++  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+ }
+ 
+ .ws-pillar-icon {
+@@ -250,30 +234,30 @@
+   margin-bottom: 20px;
+   display: inline-block;
+   padding: 16px;
+-  background: rgba(255,255,255,0.05);
++  background: rgba(212, 175, 55, 0.1);
+   border-radius: 50%;
++  border: 1px solid rgba(212, 175, 55, 0.3);
+ }
+ 
+ .ws-pillar-title {
+-  font-size: 15px;
++  font-size: 16px;
+   font-weight: 600;
+   margin-bottom: 8px;
+-  color: #fff;
++  color: #F3E5AB;
+ }
+ 
+ .ws-pillar-desc {
++  font-family: -apple-system, sans-serif;
+   font-size: 13px;
+-  color: #888;
++  color: #aaa;
+   line-height: 1.5;
+ }
+ 
+ @media (max-width: 900px) {
+-  .ws-trending-grid { grid-template-columns: repeat(2, 1fr); }
+   .ws-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+ }
+ 
+ @media (max-width: 600px) {
+-  .ws-trending-grid { grid-template-columns: 1fr; }
+   .ws-pillars-grid { grid-template-columns: 1fr; }
+   .ws-search-input { font-size: 16px; padding: 16px 110px 16px 48px; }
+   .ws-search-btn { padding: 10px 20px; }
+diff --git a/frontend/src/components/WelcomeState/WelcomeState.jsx b/frontend/src/components/WelcomeState/WelcomeState.jsx
+index 83e55a2..a49d085 100644
+--- a/frontend/src/components/WelcomeState/WelcomeState.jsx
++++ b/frontend/src/components/WelcomeState/WelcomeState.jsx
+@@ -1,49 +1,70 @@
+ import React, { useState, useRef, useEffect } from 'react'
+-import { motion, useScroll, useTransform } from 'framer-motion'
++import gsap from 'gsap'
++import { ScrollTrigger } from 'gsap/ScrollTrigger'
+ import './WelcomeState.css'
+ 
+-/* ΓöÇΓöÇ Animated mini sparkline SVG ΓöÇΓöÇ */
+-function Sparkline({ data, color, width = 80, height = 28 }) {
+-  if (!data || data.length < 2) return null
+-  const min = Math.min(...data)
+-  const max = Math.max(...data)
+-  const range = max - min || 1
+-  const points = data.map((v, i) =>
+-    `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`
+-  ).join(' ')
+-  return (
+-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+-      <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+-    </svg>
+-  )
+-}
++gsap.registerPlugin(ScrollTrigger)
+ 
+-export default function WelcomeState({ onSearch, scrollContainerRef }) {
++export default function WelcomeState({ onSearch }) {
+   const [query, setQuery] = useState('')
+   const [suggestions, setSuggestions] = useState([])
+   const [searching, setSearching] = useState(false)
+   
+-  const heroRef = useRef(null)
+-  
+-  const { scrollYProgress } = useScroll({
+-    container: scrollContainerRef,
+-    target: heroRef,
+-    offset: ["start start", "end start"]
+-  })
+-
+-  // Hero text sequence
+-  const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0])
+-  const heroScale = useTransform(scrollYProgress, [0, 0.25], [1, 0.95])
+-  const heroY = useTransform(scrollYProgress, [0, 0.25], [0, -100])
++  const rootRef = useRef(null)
++  const heroTextRef = useRef(null)
++  const searchRef = useRef(null)
++  const sectionsRef = useRef([])
+ 
+-  // Search portal sequence
+-  const searchOpacity = useTransform(scrollYProgress, [0.15, 0.4], [0, 1])
+-  const searchScale = useTransform(scrollYProgress, [0.15, 0.4], [0.9, 1])
+-  const searchY = useTransform(scrollYProgress, [0.15, 0.4], [30, 0])
++  useEffect(() => {
++    const ctx = gsap.context(() => {
++      // Hero text fade out as we scroll down into the parallax
++      gsap.to(heroTextRef.current, {
++        y: -100,
++        opacity: 0,
++        scale: 0.9,
++        scrollTrigger: {
++          trigger: rootRef.current,
++          start: 'top top',
++          end: '+=800',
++          scrub: 1
++        }
++      })
++
++      // Search bar fades in and moves up
++      gsap.fromTo(searchRef.current, 
++        { y: 50, opacity: 0, scale: 0.9 },
++        {
++          y: 0, opacity: 1, scale: 1,
++          scrollTrigger: {
++            trigger: rootRef.current,
++            start: '+=200',
++            end: '+=500',
++            scrub: 1
++          }
++        }
++      )
++
++      // Fade in sections natively
++      sectionsRef.current.forEach((sec, i) => {
++        gsap.fromTo(sec, 
++          { y: 100, opacity: 0 },
++          {
++            y: 0, opacity: 1,
++            duration: 1,
++            ease: "power3.out",
++            scrollTrigger: {
++              trigger: sec,
++              start: "top 80%",
++              toggleActions: "play none none reverse"
++            }
++          }
++        )
++      })
++    }, rootRef)
++
++    return () => ctx.revert()
++  }, [])
+ 
+-  // Background orb animations
+-  const orbY = useTransform(scrollYProgress, [0, 1], [0, 300])
+-  
+   useEffect(() => {
+     if (!query.trim()) { setSuggestions([]); return }
+     const timer = setTimeout(async () => {
+@@ -57,68 +78,39 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
+     return () => clearTimeout(timer)
+   }, [query])
+ 
+-  const handleSubmit = (e) => {
+-    e.preventDefault()
+-    const t = query.trim().toUpperCase()
+-    if (t) onSearch(t)
+-  }
+-
+-  const trendingStocks = [
+-    { sym: 'AAPL', name: 'Apple Inc.', spark: [142,145,148,147,152,155,158,160,165,170,175,178,182,185,190,195,198] },
+-    { sym: 'RELIANCE.NS', name: 'Reliance Ind.', spark: [1380,1395,1410,1405,1420,1435,1428,1440,1445,1450,1438] },
+-    { sym: 'NVDA', name: 'NVIDIA Corp.', spark: [108,112,118,125,128,132,130,135,138,140,136] },
+-    { sym: 'MSFT', name: 'Microsoft Corp.', spark: [410,415,420,425,422,430,435,438,440,442] },
+-    { sym: 'TCS.NS', name: 'TCS Ltd.', spark: [3900,3950,4000,3980,4020,4060,4080,4100,4125] },
+-    { sym: 'HDFCBANK.NS', name: 'HDFC Bank', spark: [1850,1870,1890,1910,1905,1920,1935,1940,1945] },
+-  ]
+-
+   const pillars = [
+-    { icon: '≡ƒÅó', title: 'Business Profile', desc: 'Company overview, sector positioning & competitive landscape' },
+-    { icon: '≡ƒôè', title: 'Revenue & P&L', desc: 'Revenue trends, gross margins, net income trajectory' },
+-    { icon: '≡ƒÅ░', title: 'Moat Analysis', desc: 'Competitive advantages, switching costs & network effects' },
+-    { icon: 'ΓÜû∩╕Å', title: 'SWOT Analysis', desc: 'AI-powered strengths, weaknesses, opportunities & threats' },
+-    { icon: '≡ƒÆ░', title: 'Capital Allocation', desc: 'Buybacks, dividends, R&D spend & reinvestment rates' },
+-    { icon: '≡ƒôê', title: 'Profitability', desc: 'ROE, ROIC, ROCE & margin expansion analysis' },
+-    { icon: '≡ƒÅª', title: 'Balance Sheet', desc: 'Debt structure, liquidity ratios & financial health' },
+-    { icon: '≡ƒÄ»', title: 'Valuation', desc: 'DCF, multiples, intrinsic value & margin of safety' },
++    { icon: '≡ƒÅ¢∩╕Å', title: 'Senatorial Overview', desc: 'Business profile & strategic positioning' },
++    { icon: '≡ƒô£', title: 'Treasury Records', desc: 'Revenue, margins, and net income trajectory' },
++    { icon: '≡ƒÅ░', title: 'The Moat', desc: 'Impervious competitive advantages & network effects' },
++    { icon: 'ΓÜö∩╕Å', title: 'Strategic SWOT', desc: 'Strengths, weaknesses, and incoming threats' },
++    { icon: '≡ƒ¬Ö', title: 'Capital Allocation', desc: 'Buybacks, dividends, and imperial expansion' },
++    { icon: 'ΓÜû∩╕Å', title: 'Profitability', desc: 'ROE, ROIC, and capital efficiency' },
++    { icon: '≡ƒ¢í∩╕Å', title: 'Balance Sheet', desc: 'Debt armor, liquidity, and financial fortress' },
++    { icon: '≡ƒÄ»', title: 'Valuation', desc: 'DCF, multiples, and intrinsic value' },
+   ]
+ 
+   return (
+-    <div className="ws-root">
++    <div className="ws-root" ref={rootRef}>
+       
+-      {/* ΓöÇΓöÇ Section 1: Hero Sticky Sequence ΓöÇΓöÇ */}
+-      <div className="ws-hero-container" ref={heroRef}>
++      <div className="ws-hero-container">
+         <div className="ws-hero-sticky">
+           
+-          <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
+-            <div style={{ position: 'absolute', top: '10%', left: '20%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(10,132,255,0.4) 0%, transparent 70%)', filter: 'blur(80px)' }} />
+-            <div style={{ position: 'absolute', bottom: '20%', right: '15%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(94,92,230,0.3) 0%, transparent 70%)', filter: 'blur(100px)' }} />
+-          </motion.div>
+-
+-          {/* Title that fades out */}
+-          <motion.div 
+-            className="ws-hero-title-wrapper"
+-            style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+-          >
+-            <div className="ws-hero-badge">Institutional Grade Research</div>
++          <div className="ws-hero-title-wrapper" ref={heroTextRef}>
++            <div className="ws-hero-badge">Imperium Grade Research</div>
+             <h1 className="ws-hero-title">
+-              Analyze Any Stock
+-              <span>Like a Professional.</span>
++              Analyze Any Asset
++              <span>Like an Emperor.</span>
+             </h1>
+-          </motion.div>
++          </div>
+ 
+-          {/* Search portal that fades in */}
+-          <div className="ws-search-container">
+-            <motion.div 
+-              className="ws-search-wrapper"
+-              style={{ opacity: searchOpacity, scale: searchScale, y: searchY }}
+-            >
++          <div className="ws-search-container" ref={searchRef}>
++            <div className="ws-search-wrapper">
+               <form className="ws-search-form" onSubmit={(e) => {
+                 e.preventDefault()
+                 if (query.trim()) onSearch(query.trim())
+               }}>
+                 <div className="ws-search-icon">
+-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
++                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                     <circle cx="11" cy="11" r="8"></circle>
+                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                   </svg>
+@@ -127,16 +119,16 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
+                   className="ws-search-input"
+                   value={query}
+                   onChange={(e) => setQuery(e.target.value)}
+-                  placeholder="Search AAPL, RELIANCE.NS..."
++                  placeholder="Search AAPL, MSFT, NVDA..."
+                   autoComplete="off"
+                   spellCheck={false}
+                 />
+-                <button type="submit" className="ws-search-btn">Analyze</button>
++                <button type="submit" className="ws-search-btn">Conquer</button>
+                 
+                 {query.trim() && (
+                   <div className="ws-search-dropdown">
+                     {searching ? (
+-                      <div className="ws-search-dd-item muted">Searching...</div>
++                      <div className="ws-search-dd-item muted">Consulting the oracles...</div>
+                     ) : suggestions.length > 0 ? (
+                       suggestions.map(s => (
+                         <div key={s.symbol} className="ws-search-dd-item" onMouseDown={() => onSearch(s.symbol)}>
+@@ -146,78 +138,30 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
+                         </div>
+                       ))
+                     ) : (
+-                      <div className="ws-search-dd-item muted">No results found</div>
++                      <div className="ws-search-dd-item muted">No assets found in the empire.</div>
+                     )}
+                   </div>
+                 )}
+               </form>
+-            </motion.div>
++            </div>
+           </div>
+ 
+         </div>
+       </div>
+ 
+-      {/* ΓöÇΓöÇ Section 2: Trending Stocks ΓöÇΓöÇ */}
+-      <div className="ws-section">
+-        <motion.div 
+-          className="ws-section-header"
+-          initial={{ opacity: 0, y: 30 }}
+-          whileInView={{ opacity: 1, y: 0 }}
+-          viewport={{ root: scrollContainerRef, once: true, margin: "-100px" }}
+-          transition={{ duration: 0.6, ease: "easeOut" }}
+-        >
+-          <div className="ws-section-label">Trending Ecosystem</div>
+-          <h2 className="ws-section-title">The pulse of the markets.</h2>
+-        </motion.div>
+-
+-        <div className="ws-trending-grid">
+-          {trendingStocks.map((s, i) => (
+-            <motion.button
+-              key={s.sym}
+-              className="ws-trending-card"
+-              onClick={() => onSearch(s.sym)}
+-              initial={{ opacity: 0, y: 40 }}
+-              whileInView={{ opacity: 1, y: 0 }}
+-              viewport={{ root: scrollContainerRef, once: true, margin: "-50px" }}
+-              transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+-            >
+-              <div className="ws-trending-sym">{s.sym}</div>
+-              <div className="ws-trending-name">{s.name}</div>
+-              <div className="ws-trending-chart">
+-                <Sparkline data={s.spark} color="#0A84FF" width={100} height={36} />
+-              </div>
+-            </motion.button>
+-          ))}
+-        </div>
+-      </div>
+-
+-      {/* ΓöÇΓöÇ Section 3: 14-Pillar Framework ΓöÇΓöÇ */}
+-      <div className="ws-section" style={{ paddingBottom: 200 }}>
+-        <motion.div 
+-          className="ws-section-header"
+-          initial={{ opacity: 0, y: 30 }}
+-          whileInView={{ opacity: 1, y: 0 }}
+-          viewport={{ root: scrollContainerRef, once: true, margin: "-100px" }}
+-          transition={{ duration: 0.6, ease: "easeOut" }}
+-        >
+-          <div className="ws-section-label">14-Pillar Analysis</div>
++      <div className="ws-section" style={{ paddingBottom: 200, paddingTop: '50vh' }} ref={el => sectionsRef.current[0] = el}>
++        <div className="ws-section-header">
++          <div className="ws-section-label">The 14-Pillar Codex</div>
+           <h2 className="ws-section-title">Deep dive, simplified.</h2>
+-        </motion.div>
++        </div>
+ 
+         <div className="ws-pillars-grid">
+           {pillars.map((p, i) => (
+-            <motion.div
+-              key={i}
+-              className="ws-pillar-card"
+-              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+-              viewport={{ root: scrollContainerRef, once: true, margin: "-50px" }}
+-              transition={{ duration: 0.5, delay: (i % 4) * 0.1, ease: "easeOut" }}
+-            >
++            <div key={i} className="ws-pillar-card">
+               <div className="ws-pillar-icon">{p.icon}</div>
+               <div className="ws-pillar-title">{p.title}</div>
+               <div className="ws-pillar-desc">{p.desc}</div>
+-            </motion.div>
++            </div>
+           ))}
+         </div>
+       </div>

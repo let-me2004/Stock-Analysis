@@ -58,10 +58,10 @@ export default function Header({ onSearch, onExport, ticker }) {
   return (
     <header className="app-header">
       <div className="header-logo">
-        <div className="header-logo-icon">EQ</div>
+        <div className="header-logo-icon">IV</div>
         <div>
-          <div className="header-logo-text">EquityIQ</div>
-          <div className="header-logo-sub">Institutional Research</div>
+          <div className="header-logo-text">Invega</div>
+          <div className="header-logo-sub">Analytics</div>
         </div>
       </div>
 

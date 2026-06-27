@@ -17,6 +17,7 @@ import Outlook from './components/sections/Outlook'
 import Valuation from './components/sections/Valuation'
 import PeerComparison from './components/sections/PeerComparison'
 import StockHistory from './components/sections/StockHistory'
+import MarketIntelligence from './components/sections/MarketIntelligence/MarketIntelligence'
 import WelcomeState from './components/WelcomeState/WelcomeState'
 import { useStock } from './hooks/useStock'
 import { exportToPDF } from './utils/pdfExport'
@@ -25,8 +26,8 @@ function LoadingState({ ticker }) {
   return (
     <div className="loading-state">
       <div className="spinner" />
-      <div className="loading-text">Loading {ticker} analysis...</div>
-      <div className="loading-sub">Fetching financial data</div>
+      <div className="loading-text">Analyzing {ticker}</div>
+      <div className="loading-sub">Fetching financial data &amp; running models</div>
     </div>
   )
 }
@@ -34,11 +35,11 @@ function LoadingState({ ticker }) {
 function ErrorState({ error, ticker }) {
   return (
     <div className="error-state">
-      <div className="error-code">⚠️</div>
-      <div className="error-title">Could not load {ticker}</div>
+      <div className="error-code">—</div>
+      <div className="error-title">Signal not found — {ticker}</div>
       <div className="error-msg">{error}</div>
-      <div style={{ fontSize: 12, color: 'var(--t-muted)', marginTop: 8 }}>
-        Try a valid ticker like AAPL, MSFT, RELIANCE.NS, or BP.L
+      <div style={{ fontSize: 11, color: 'var(--t-muted)', marginTop: 8, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        Try: AAPL · MSFT · RELIANCE.NS · BP.L
       </div>
     </div>
   )
@@ -110,6 +111,7 @@ export default function App() {
                 </div>
                 <PeerComparison ticker={ticker} data={data} />
                 <StockHistory data={data} />
+                <MarketIntelligence ticker={ticker} />
               </div>
             </>
           )}

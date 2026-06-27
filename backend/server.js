@@ -7,13 +7,14 @@ import express from 'express'
 import cors from 'cors'
 import stockRoutes from './routes/stock.js'
 import aiRoutes from './routes/ai.js'
+import intelligenceRoutes from './routes/intelligence.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:4173'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:4173'],
   credentials: true,
 }))
 app.use(express.json({ limit: '2mb' }))
@@ -28,6 +29,7 @@ app.use((req, _res, next) => {
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/stock', stockRoutes)
 app.use('/api/ai', aiRoutes)
+app.use('/api/stock', intelligenceRoutes)
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
