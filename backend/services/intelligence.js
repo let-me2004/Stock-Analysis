@@ -142,9 +142,8 @@ export async function getYoutubeVideos(ticker) {
     const proxyUrl = process.env.PROXY_URL ? process.env.PROXY_URL.trim().replace(/^["']|["']$/g, '') : ''
     const proxyArg = proxyUrl ? `--proxy "${proxyUrl}"` : ''
     
-    // Use full path if inside docker (/opt/venv/bin/yt-dlp) or just yt-dlp if global
-    const ytDlpPath = process.env.AGENT_REACH_PYTHON ? 'yt-dlp' : '/opt/venv/bin/yt-dlp'
-    const cmd = `${ytDlpPath} ${proxyArg} "ytsearch5:${query}" --print "%(id)s|||%(title)s|||%(channel)s|||%(upload_date)s|||%(duration_string)s|||%(view_count)s" --no-download --no-warnings`
+    // yt-dlp is in the PATH in Docker, and available globally locally
+    const cmd = `yt-dlp ${proxyArg} "ytsearch5:${query}" --print "%(id)s|||%(title)s|||%(channel)s|||%(upload_date)s|||%(duration_string)s|||%(view_count)s" --no-download --no-warnings`
     
     const { stdout } = await execAsync(cmd, { timeout: 20000 })
     const lines = stdout.trim().split('\n').filter(Boolean)
