@@ -1,12 +1,12 @@
 import YahooFinance from 'yahoo-finance2'
 import * as cache from '../cache.js'
-import { ProxyAgent } from 'undici'
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
 
 if (process.env.PROXY_URL) {
   try {
     let proxyUrl = process.env.PROXY_URL.trim().replace(/^["']|["']$/g, '')
+    const { ProxyAgent } = await import('undici')
     if (!yahooFinance._opts.fetchOptions) {
       yahooFinance._opts.fetchOptions = {}
     }
