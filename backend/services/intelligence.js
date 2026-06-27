@@ -145,7 +145,7 @@ export async function getYoutubeVideos(ticker) {
     // yt-dlp is in the PATH in Docker, and available globally locally
     const cmd = `yt-dlp ${proxyArg} "ytsearch5:${query}" --print "%(id)s|||%(title)s|||%(channel)s|||%(upload_date)s|||%(duration_string)s|||%(view_count)s" --no-download --no-warnings`
     
-    const { stdout } = await execAsync(cmd, { timeout: 20000 })
+    const { stdout } = await execAsync(cmd, { timeout: 60000 })
     const lines = stdout.trim().split('\n').filter(Boolean)
 
     return lines.map(line => {
@@ -161,8 +161,18 @@ export async function getYoutubeVideos(ticker) {
         views: parseInt(views) || 0,
       }
     })
-  } catch {
-    return []
+  } catch (err) {
+    console.error("YTDLP Error:", err.message)
+    // Surface the error visually so we can debug without Render logs
+    return [{
+      id: 'error',
+      title: `Debug Error: ${err.message}`,
+      channel: 'System',
+      url: '#',
+      thumbnail: 'https://via.placeholder.com/320x180?text=Error',
+      duration: '0:00',
+      views: 0
+    }]
   }
 }
 
