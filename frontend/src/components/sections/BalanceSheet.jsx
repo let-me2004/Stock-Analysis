@@ -11,6 +11,7 @@ export default function BalanceSheet({ data }) {
   const latest = balance[0] || {}
   const latestInc = income[0] || {}
   const latestCF = cashflow[0] || {}
+  const quote = data?.quote?.[0] || {}
 
   // Interest coverage = EBIT / Interest expense
   const ebit = latestInc.operatingIncome || 0
