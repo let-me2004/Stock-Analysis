@@ -15,7 +15,7 @@ WORKDIR /app
 # Create a Python virtual environment and install agent-reach
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir https://github.com/Panniantong/agent-reach/archive/main.zip
+RUN pip install --no-cache-dir https://github.com/Panniantong/agent-reach/archive/main.zip yt-dlp
 RUN agent-reach install --env=auto --safe
 
 # Install mcporter and configure Exa MCP

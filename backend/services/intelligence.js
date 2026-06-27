@@ -56,17 +56,25 @@ export async function getExaResults(ticker) {
   return []
 }
 
-// ── Reddit via Jina (public Reddit JSON API — no auth needed for public posts) ─
+// ── Reddit via public JSON API (no auth needed) ──────────────────────────────
 export async function getRedditPosts(ticker) {
   const clean = ticker.replace(/\.NS$|\.BO$|\.L$|\.TO$/, '')
-  const subs = ['investing', 'stocks', 'IndiaInvestments', 'wallstreetbets']
+  // Prioritize Indian subreddits if it's an Indian stock
+  const isIndian = ticker.endsWith('.NS') || ticker.endsWith('.BO')
+  const subs = isIndian 
+    ? ['IndiaInvestments', 'IndianStockMarket', 'DalalStreetTalks', 'investing']
+    : ['investing', 'stocks', 'wallstreetbets', 'SecurityAnalysis']
+    
   const results = []
+  const proxyUrl = process.env.PROXY_URL ? process.env.PROXY_URL.trim().replace(/^["']|["']$/g, '') : ''
+  const proxyArg = proxyUrl ? `-x "${proxyUrl}"` : ''
 
-  for (const sub of subs.slice(0, 2)) {
+  // Fetch from all 4 subreddits in parallel for speed
+  await Promise.all(subs.map(async (sub) => {
     try {
       const url = `https://www.reddit.com/r/${sub}/search.json?q=${encodeURIComponent(clean)}&sort=new&limit=5&restrict_sr=1`
       const { stdout } = await execAsync(
-        `curl -s -H "User-Agent: InvegaAnalytics/1.0" "${url}"`,
+        `curl -s ${proxyArg} -H "User-Agent: InvegaAnalytics/1.0" "${url}"`,
         { timeout: 10000 }
       )
       const data = JSON.parse(stdout)
@@ -83,10 +91,13 @@ export async function getRedditPosts(ticker) {
           createdAt: new Date(post.created_utc * 1000).toISOString(),
         })
       })
-    } catch { /* subreddit may be unavailable */ }
-  }
+    } catch (e) { 
+      console.error(`Reddit /r/${sub} error:`, e.message)
+    }
+  }))
 
-  return results.slice(0, 8)
+  // Sort by score (descending) and return top 8
+  return results.sort((a, b) => b.score - a.score).slice(0, 8)
 }
 
 // ── Twitter/X via agent-reach (requires configured cookies) ─────────────────
@@ -100,7 +111,12 @@ export async function getTwitterPosts(ticker) {
     const clean = ticker.replace(/\.NS$|\.BO$|\.L$|\.TO$/, '')
     const query = `$${clean} OR #${clean} stock -filter:retweets`
     const cmd = `"${venvPython}" -m agent_reach twitter search --query "${query}" --num 10 --format json`
-    const { stdout } = await execAsync(cmd, { timeout: 15000 })
+    
+    // Inject proxy env vars so agent-reach can use it
+    const proxyUrl = process.env.PROXY_URL ? process.env.PROXY_URL.trim().replace(/^["']|["']$/g, '') : ''
+    const env = proxyUrl ? { ...process.env, HTTP_PROXY: proxyUrl, HTTPS_PROXY: proxyUrl } : process.env
+
+    const { stdout } = await execAsync(cmd, { timeout: 15000, env })
     const tweets = JSON.parse(stdout)
 
     return tweets.map(t => ({
@@ -122,7 +138,14 @@ export async function getYoutubeVideos(ticker) {
   try {
     const clean = ticker.replace(/\.NS$|\.BO$|\.L$|\.TO$/, '')
     const query = `${clean} stock analysis 2025`
-    const cmd = `yt-dlp "ytsearch5:${query}" --print "%(id)s|||%(title)s|||%(channel)s|||%(upload_date)s|||%(duration_string)s|||%(view_count)s" --no-download --no-warnings`
+    
+    const proxyUrl = process.env.PROXY_URL ? process.env.PROXY_URL.trim().replace(/^["']|["']$/g, '') : ''
+    const proxyArg = proxyUrl ? `--proxy "${proxyUrl}"` : ''
+    
+    // Use full path if inside docker (/opt/venv/bin/yt-dlp) or just yt-dlp if global
+    const ytDlpPath = process.env.AGENT_REACH_PYTHON ? 'yt-dlp' : '/opt/venv/bin/yt-dlp'
+    const cmd = `${ytDlpPath} ${proxyArg} "ytsearch5:${query}" --print "%(id)s|||%(title)s|||%(channel)s|||%(upload_date)s|||%(duration_string)s|||%(view_count)s" --no-download --no-warnings`
+    
     const { stdout } = await execAsync(cmd, { timeout: 20000 })
     const lines = stdout.trim().split('\n').filter(Boolean)
 
