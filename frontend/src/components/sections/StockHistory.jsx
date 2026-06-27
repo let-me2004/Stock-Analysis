@@ -14,9 +14,9 @@ const PERIODS = [
 const TTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 11, boxShadow: 'var(--shadow-md)' }}>
+    <div style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 8, padding: '8px 12px', fontSize: 11, boxShadow: 'var(--shadow-md)' }}>
       <div style={{ color: 'var(--t-muted)', marginBottom: 2 }}>{label}</div>
-      <div style={{ fontWeight: 600, fontFamily: 'var(--font-mono)', fontSize: 13 }}>{fmt.price(payload[0]?.value)}</div>
+      <div style={{ fontWeight: 600, fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--t-primary)' }}>{fmt.price(payload[0]?.value)}</div>
     </div>
   )
 }
@@ -35,11 +35,15 @@ export default function StockHistory({ data }) {
     cutoff.setDate(cutoff.getDate() - periodDays)
     return sorted
       .filter((d) => new Date(d.date) >= cutoff)
-      .map((d) => ({ date: d.date.slice(5), price: d.close || d.price }))
+      .map((d) => ({ date: d.date.slice(5), price: Number(d.close || d.price) }))
+      .filter((d) => !isNaN(d.price) && d.price > 0)
   }, [priceHistory, periodDays])
 
   // CAGR calculations
-  const allSorted = [...priceHistory].sort((a, b) => new Date(a.date) - new Date(b.date))
+  const allSorted = [...priceHistory]
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .filter((d) => !isNaN(Number(d.close || d.price)) && Number(d.close || d.price) > 0)
+    
   const oldest = allSorted[0]
   const latest = allSorted[allSorted.length - 1]
   const yearSpan = oldest && latest
@@ -52,7 +56,7 @@ export default function StockHistory({ data }) {
   // Period return
   const periodStart = chartData[0]?.price
   const periodEnd = chartData[chartData.length - 1]?.price
-  const periodReturn = periodStart && periodEnd ? ((periodEnd - periodStart) / periodStart) * 100 : null
+  const periodReturn = (periodStart && periodEnd && periodStart > 0) ? ((periodEnd - periodStart) / periodStart) * 100 : null
   const isPositive = periodReturn == null || periodReturn >= 0
 
   const high = chartData.length ? Math.max(...chartData.map((d) => d.price)) : null
