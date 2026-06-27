@@ -32,7 +32,8 @@ async function exaSearch(query, numResults = 5) {
   }
 }
 
-export { getFinancialNews } from './yf.js'
+import { getFinancialNews } from './yf.js'
+export { getFinancialNews }
 
 // ── Exa semantic search for stock-related content ───────────────────────────
 export async function getExaResults(ticker) {
