@@ -1,7 +1,18 @@
 import YahooFinance from 'yahoo-finance2'
 import * as cache from '../cache.js'
+import { HttpsProxyAgent } from 'https-proxy-agent'
+import fetch from 'node-fetch'
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
+
+if (process.env.PROXY_URL) {
+  const proxyAgent = new HttpsProxyAgent(process.env.PROXY_URL)
+  yahooFinance.setGlobalConfig({
+    fetchFunc: (url, init) => {
+      return fetch(url, { ...init, agent: proxyAgent })
+    }
+  })
+}
 
 // Helper to fetch fundamentalsTimeSeries for a specific module
 async function getTimeSeries(ticker, module) {
