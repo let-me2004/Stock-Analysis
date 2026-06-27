@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-export default function Header({ onSearch, onExport, ticker }) {
+export default function Header({ onSearch, onExport, ticker, onToggleSidebar }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isFocused, setIsFocused] = useState(false)
@@ -57,12 +57,28 @@ export default function Header({ onSearch, onExport, ticker }) {
 
   return (
     <header className="app-header">
-      <div className="header-logo">
-        <div className="header-logo-icon">IV</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <button 
+          onClick={onToggleSidebar} 
+          style={{ 
+            background: 'none', border: 'none', color: 'var(--t-muted)', 
+            cursor: 'pointer', padding: '4px', display: 'flex' 
+          }}
+          title="Toggle Sidebar"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div className="header-logo">
+          <div className="header-logo-icon">IV</div>
         <div>
           <div className="header-logo-text">Invega</div>
           <div className="header-logo-sub">Analytics</div>
         </div>
+      </div>
       </div>
 
       <div className="header-search-wrap" ref={wrapperRef}>

@@ -75,6 +75,7 @@ export default function App() {
   }
 
   const [hasPassedCurtain, setHasPassedCurtain] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   // Prevent background scrolling while curtain is up
   useEffect(() => {
@@ -88,9 +89,9 @@ export default function App() {
   return (
     <div className="app-root">
       {!hasPassedCurtain && <SplashCurtain onComplete={() => setHasPassedCurtain(true)} />}
-      <Header onSearch={handleSearch} onExport={handleExport} ticker={ticker} />
+      <Header onSearch={handleSearch} onExport={handleExport} ticker={ticker} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <div className="app-body">
-        <Sidebar currentTicker={ticker} onSelectTicker={handleSearch} />
+        <Sidebar currentTicker={ticker} onSelectTicker={handleSearch} isOpen={isSidebarOpen} />
         <main className={`main-content ${!ticker ? 'welcome-mode' : ''}`} ref={reportRef}>
           {!ticker && <WelcomeState onSearch={handleSearch} scrollContainerRef={reportRef} />}
           {ticker && loading && <LoadingState ticker={ticker} />}

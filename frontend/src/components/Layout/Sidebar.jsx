@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useWatchlist } from '../../hooks/useWatchlist'
 
-export default function Sidebar({ currentTicker, onSelectTicker }) {
+export default function Sidebar({ currentTicker, onSelectTicker, isOpen }) {
   const { watchlist, addTicker, removeTicker } = useWatchlist()
   const [showAddForm, setShowAddForm] = useState(false)
   const [inputVal, setInputVal] = useState('')
@@ -18,7 +18,7 @@ export default function Sidebar({ currentTicker, onSelectTicker }) {
   }
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${!isOpen ? 'collapsed' : ''}`}>
       <div className="sidebar-section-label">Watchlist</div>
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
