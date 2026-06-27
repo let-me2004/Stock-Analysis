@@ -276,9 +276,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.2s;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: grayscale(100%) contrast(0.85) brightness(0.6);
 }
-.mi-video-thumb-wrap:hover .mi-video-thumb { opacity: 0.8; }
+.mi-video-thumb-wrap:hover .mi-video-thumb { 
+  filter: grayscale(0%) contrast(1) brightness(0.9);
+  transform: scale(1.05);
+}
 
 .mi-video-duration {
   position: absolute;
