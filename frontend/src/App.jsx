@@ -19,6 +19,7 @@ import PeerComparison from './components/sections/PeerComparison'
 import StockHistory from './components/sections/StockHistory'
 import MarketIntelligence from './components/sections/MarketIntelligence/MarketIntelligence'
 import WelcomeState from './components/WelcomeState/WelcomeState'
+import SplashCurtain from './components/SplashCurtain/SplashCurtain'
 import { useStock } from './hooks/useStock'
 import { exportToPDF } from './utils/pdfExport'
 
@@ -73,8 +74,20 @@ export default function App() {
     await exportToPDF(reportRef.current, ticker)
   }
 
+  const [hasPassedCurtain, setHasPassedCurtain] = useState(false)
+
+  // Prevent background scrolling while curtain is up
+  useEffect(() => {
+    if (!hasPassedCurtain) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
+  }, [hasPassedCurtain])
+
   return (
     <div className="app-root">
+      {!hasPassedCurtain && <SplashCurtain onComplete={() => setHasPassedCurtain(true)} />}
       <Header onSearch={handleSearch} onExport={handleExport} ticker={ticker} />
       <div className="app-body">
         <Sidebar currentTicker={ticker} onSelectTicker={handleSearch} />
