@@ -48,10 +48,12 @@ export async function getFullAnalysis(ticker) {
   ]
   
   let summary = {}
+  let summaryError = null
   try {
     summary = await yahooFinance.quoteSummary(ticker, { modules: qsModules })
   } catch (e) {
-    console.error("YF quoteSummary error:", e)
+    console.error("YF quoteSummary error:", e.message)
+    summaryError = e
   }
 
   // Fetch fundamentalsTimeSeries for complete historical financials
@@ -80,6 +82,9 @@ export async function getFullAnalysis(ticker) {
   
   // If we couldn't fetch basic price or profile data, the ticker likely doesn't exist
   if (!pr.regularMarketPrice && !p.sector) {
+    if (summaryError) {
+      throw summaryError
+    }
     return { profile: [] }
   }
   
