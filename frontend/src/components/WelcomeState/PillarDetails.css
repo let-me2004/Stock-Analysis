@@ -1,0 +1,100 @@
+.pillar-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 2rem;
+  overflow-y: auto;
+}
+
+.pillar-details-content {
+  max-width: 800px;
+  width: 100%;
+  padding: 3rem;
+  border-radius: 16px;
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+.back-button {
+  background: transparent;
+  border: 1px solid var(--c-border-strong);
+  color: var(--t-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 2rem;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.pillar-header {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1.5rem;
+}
+
+.pillar-number {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  color: var(--t-green);
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.pillar-title {
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--t-primary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pillar-body {
+  font-family: var(--font);
+  color: var(--t-secondary);
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.pillar-paragraph {
+  margin-bottom: 1.5rem;
+}
+
+/* Scrollbar styles for the overlay */
+.pillar-details-overlay::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pillar-details-overlay::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.pillar-details-overlay::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.pillar-details-overlay::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

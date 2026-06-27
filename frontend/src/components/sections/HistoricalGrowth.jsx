@@ -59,12 +59,11 @@ export default function HistoricalGrowth({ data }) {
     EPS: parseFloat((yr.epsdiluted || yr.eps || 0).toFixed(2)),
   }))
 
-  const cagrItems = [
-    { label: `Rev CAGR ${rev5Span}Y`,  value: rev5CAGR,  target: 0.05, unit: '%' },
-    { label: `Rev CAGR ${rev10Span}Y`, value: rev10CAGR, target: 0.05, unit: '%' },
-    { label: `EPS CAGR ${eps5Span}Y`,  value: eps5CAGR,  target: 0.07, unit: '%' },
-    { label: `EPS CAGR ${eps10Span}Y`, value: eps10CAGR, target: 0.07, unit: '%' },
-  ]
+  const cagrItems = []
+  if (rev5Span >= 2) cagrItems.push({ label: `Rev CAGR ${rev5Span}Y`, value: rev5CAGR, target: 0.05, unit: '%' })
+  if (rev10Span > rev5Span) cagrItems.push({ label: `Rev CAGR ${rev10Span}Y`, value: rev10CAGR, target: 0.05, unit: '%' })
+  if (eps5Span >= 2) cagrItems.push({ label: `EPS CAGR ${eps5Span}Y`, value: eps5CAGR, target: 0.07, unit: '%' })
+  if (eps10Span > eps5Span) cagrItems.push({ label: `EPS CAGR ${eps10Span}Y`, value: eps10CAGR, target: 0.07, unit: '%' })
 
   return (
     <div className="card">

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import './WelcomeState.css'
+import { pillarsData } from '../../data/pillarsData'
+import PillarDetails from './PillarDetails'
 
 /* ── Animated mini sparkline SVG ── */
 function Sparkline({ data, color, width = 80, height = 28 }) {
@@ -22,6 +24,7 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [searching, setSearching] = useState(false)
+  const [activePillar, setActivePillar] = useState(null)
   
   const heroRef = useRef(null)
   
@@ -68,16 +71,7 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
     { sym: 'HDFCBANK.NS', name: 'HDFC Bank', spark: [1850,1870,1890,1910,1905,1920,1935,1940,1945] },
   ]
 
-  const pillars = [
-    { title: 'Business Profile', desc: 'Company overview, sector positioning & competitive landscape' },
-    { title: 'Revenue & P&L', desc: 'Revenue trends, gross margins, net income trajectory' },
-    { title: 'Moat Analysis', desc: 'Competitive advantages, switching costs & network effects' },
-    { title: 'SWOT Analysis', desc: 'AI-powered strengths, weaknesses, opportunities & threats' },
-    { title: 'Capital Allocation', desc: 'Buybacks, dividends, R&D spend & reinvestment rates' },
-    { title: 'Profitability', desc: 'ROE, ROIC, ROCE & margin expansion analysis' },
-    { title: 'Balance Sheet', desc: 'Debt structure, liquidity ratios & financial health' },
-    { title: 'Valuation', desc: 'DCF, multiples, intrinsic value & margin of safety' },
-  ]
+  // We will now use pillarsData imported from data/pillarsData.js
 
   return (
     <div className="ws-root" style={{ background: 'transparent' }}>
@@ -195,21 +189,36 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
         </motion.div>
 
         <div className="ws-pillars-grid">
-          {pillars.map((p, i) => (
+          {pillarsData.map((p, i) => (
             <motion.div
-              key={i}
-              className="ws-pillar-card"
+              key={p.id}
+              className="ws-pillar-card clickable-pillar"
+              onClick={() => setActivePillar(p)}
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ root: scrollContainerRef, once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: (i % 4) * 0.1, ease: "easeOut" }}
             >
-              <div className="ws-pillar-title">{p.title}</div>
-              <div className="ws-pillar-desc">{p.desc}</div>
+              <div className="ws-pillar-title">#{p.id} {p.title}</div>
+              <div className="ws-pillar-desc">{p.text[0].length > 60 ? p.text[0].substring(0, 60) + '...' : p.text[0]}</div>
             </motion.div>
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {activePillar && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 1000 }}
+          >
+            <PillarDetails pillar={activePillar} onClose={() => setActivePillar(null)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   )

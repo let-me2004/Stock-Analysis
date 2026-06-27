@@ -25,7 +25,7 @@ COMPANY DATA:
 - Gross Margin: ${pct(rt.grossProfitMarginTTM)}
 - Operating Margin: ${pct(rt.operatingProfitMarginTTM)}
 - Net Margin: ${pct(rt.netProfitMarginTTM)}
-- FCF Margin: ${pct(km.freeCashFlowPerShareTTM && q.price ? (km.freeCashFlowPerShareTTM / q.price) : null)}
+- FCF Margin: ${pct(km.freeCashFlowMarginTTM || (km.freeCashFlowPerShareTTM && km.revenuePerShareTTM ? km.freeCashFlowPerShareTTM / km.revenuePerShareTTM : null))}
 - ROIC: ${pct(km.roicTTM)}
 - P/E (TTM): ${num(rt.peRatioTTM)}
 - EV/EBITDA: ${num(rt.enterpriseValueMultipleTTM)}

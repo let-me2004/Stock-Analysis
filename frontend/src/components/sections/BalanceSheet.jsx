@@ -14,11 +14,30 @@ export default function BalanceSheet({ data }) {
 
   // Interest coverage = EBIT / Interest expense
   const ebit = latestInc.operatingIncome || 0
-  const interest = Math.abs(latestInc.interestExpense || 1)
+  const interest = Math.abs(latestInc.interestExpense || 0)
   const interestCoverage = interest > 0 ? ebit / interest : null
 
-  // Net Debt / FCF
-  const netDebt = (latest.totalDebt || 0) - (latest.cashAndCashEquivalents || 0)
+  // Debt / Equity
+  const totalDebt = latest.totalDebt || 0
+  const fallbackEquity = latest.totalEquity != null ? latest.totalEquity : ((latest.totalAssets != null && latest.totalLiabilities != null) ? (latest.totalAssets - latest.totalLiabilities) : null)
+  
+  const rawDteTTM = rtTTM.debtToEquityRatioTTM ?? rtTTM.debtEquityRatioTTM // Handle potential naming differences
+  const debtToEquity = (rawDteTTM != null && !isNaN(rawDteTTM))
+    ? rawDteTTM
+    : (fallbackEquity && fallbackEquity !== 0 ? totalDebt / fallbackEquity : null)
+  
+  const cash = latest.cashAndShortTermInvestments != null ? latest.cashAndShortTermInvestments : (latest.cashAndCashEquivalents != null ? latest.cashAndCashEquivalents : 0)
+  
+  // Book Value / Share
+  const shares = latest.sharesOutstanding || quote.sharesOutstanding || 1
+  const fallbackBookValue = latest.totalEquity != null ? latest.totalEquity : ((latest.totalAssets != null && latest.totalLiabilities != null) ? (latest.totalAssets - latest.totalLiabilities) : null)
+  
+  const rawBVTTM = kmTTM.bookValuePerShareTTM
+  const bookValuePerShare = (rawBVTTM != null && !isNaN(rawBVTTM))
+    ? rawBVTTM 
+    : (fallbackBookValue != null ? fallbackBookValue / shares : null)
+
+  const netDebt = totalDebt - cash
   const fcf = latestCF.freeCashFlow || latestCF.operatingCashFlow || 1
   const netDebtFCF = fcf > 0 ? netDebt / fcf : null
 
@@ -26,13 +45,14 @@ export default function BalanceSheet({ data }) {
   const trendData = balance.slice(0, 6).reverse().map((b, i) => {
     const cf = cashflow[balance.length - 1 - i] || {}
     const inc = income[balance.length - 1 - i] || {}
-    const nd = (b.totalDebt || 0) - (b.cashAndCashEquivalents || 0)
+    const cashVal = b.cashAndShortTermInvestments || b.cashAndCashEquivalents || 0
+    const nd = (b.totalDebt || 0) - cashVal
     const fcfVal = cf.freeCashFlow || 0
     return {
       year: fmt.year(b.date),
       'Total Debt': b.totalDebt,
       'Net Debt': nd,
-      'Cash': b.cashAndCashEquivalents,
+      'Cash': cashVal,
     }
   })
 
@@ -76,7 +96,7 @@ export default function BalanceSheet({ data }) {
           </div>
           <div className="metric-item">
             <div className="metric-label">Cash &amp; Equivalents</div>
-            <div className="metric-value good">{fmt.money(latest.cashAndCashEquivalents)}</div>
+            <div className="metric-value good">{fmt.money(cash)}</div>
           </div>
           <div className="metric-item">
             <div className="metric-label">Net Debt</div>
@@ -84,20 +104,20 @@ export default function BalanceSheet({ data }) {
           </div>
           <div className="metric-item">
             <div className="metric-label">Debt / Equity</div>
-            <div className={`metric-value ${metricClass(rtTTM.debtEquityRatioTTM, 1, 3, false)}`}>
-              {fmt.multiple(rtTTM.debtEquityRatioTTM)}
+            <div className={`metric-value ${metricClass(debtToEquity, 1, 3, false)}`}>
+              {fmt.multiple(debtToEquity)}
             </div>
           </div>
           <div className="metric-item">
             <div className="metric-label">Current Ratio</div>
-            <div className={`metric-value ${metricClass(kmTTM.currentRatioTTM, 1.5, 1)}`}>
-              {fmt.multiple(kmTTM.currentRatioTTM)}
+            <div className={`metric-value ${metricClass(kmTTM.currentRatioTTM || (latest.currentAssets && latest.currentLiabilities ? latest.currentAssets / latest.currentLiabilities : null), 1.5, 1)}`}>
+              {fmt.multiple(kmTTM.currentRatioTTM || (latest.currentAssets && latest.currentLiabilities ? latest.currentAssets / latest.currentLiabilities : null))}
             </div>
             <div className="metric-sublabel">Target: &gt;1.5x</div>
           </div>
           <div className="metric-item">
             <div className="metric-label">Book Value/Share</div>
-            <div className="metric-value">{fmt.price(kmTTM.bookValuePerShareTTM)}</div>
+            <div className="metric-value">{fmt.price(bookValuePerShare)}</div>
           </div>
         </div>
 

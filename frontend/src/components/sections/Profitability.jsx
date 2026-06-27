@@ -35,13 +35,26 @@ export default function Profitability({ data }) {
     }
   })
 
+  const latestInc = income[0] || {}
+  const latestCF = cashflow[0] || {}
+  
+  const fallbackEbitda = latestInc.ebitda != null 
+    ? latestInc.ebitda 
+    : (latestInc.operatingIncome != null ? latestInc.operatingIncome + Math.abs(latestCF.depreciationAndAmortization || 0) : null)
+    
+  const fallbackEbitdaMargin = (latestInc.revenue && fallbackEbitda != null) ? (fallbackEbitda / latestInc.revenue) : null
+  const fallbackFcfMargin = (latestInc.revenue && latestCF.freeCashFlow != null) ? (latestCF.freeCashFlow / latestInc.revenue) : null
+
+  const ebitdaMargin = (rtTTM.ebitdaMarginTTM != null && !isNaN(rtTTM.ebitdaMarginTTM)) ? rtTTM.ebitdaMarginTTM : fallbackEbitdaMargin
+  const fcfMargin = (kmTTM.freeCashFlowMargin != null && !isNaN(kmTTM.freeCashFlowMargin)) ? kmTTM.freeCashFlowMargin : ((kmTTM.freeCashFlowMarginTTM != null && !isNaN(kmTTM.freeCashFlowMarginTTM)) ? kmTTM.freeCashFlowMarginTTM : fallbackFcfMargin)
+
   const margins = [
     { label: 'Gross Margin (TTM)',     value: rtTTM.grossProfitMarginTTM,      good: 0.4,  bad: 0.2 },
     { label: 'Operating Margin (TTM)', value: rtTTM.operatingProfitMarginTTM,  good: 0.2,  bad: 0.05 },
     { label: 'Net Margin (TTM)',       value: rtTTM.netProfitMarginTTM,        good: 0.15, bad: 0.03 },
-    { label: 'EBITDA Margin (TTM)',    value: rtTTM.ebitdaMarginTTM,           good: 0.25, bad: 0.1 },
-    { label: 'FCF Margin',            value: kmTTM.freeCashFlowMargin,         good: 0.15, bad: 0.05 },
-    { label: 'ROE (TTM)',             value: rtTTM.returnOnEquityTTM,          good: 0.15, bad: 0.08 },
+    { label: 'EBITDA Margin (TTM)',    value: ebitdaMargin,  good: 0.25, bad: 0.1 },
+    { label: 'FCF Margin',             value: fcfMargin, good: 0.15, bad: 0.05 },
+    { label: 'ROE (TTM)',              value: rtTTM.returnOnEquityTTM,          good: 0.15, bad: 0.08 },
   ]
 
   return (
