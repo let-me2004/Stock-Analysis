@@ -15,13 +15,24 @@ export default function StockHeader({ data }) {
 
   useEffect(() => {
     if (!symbol) return
-    const watchList = JSON.parse(localStorage.getItem('watchlist') || '[]')
-    setInWatchlist(watchList.some(s => s.symbol === symbol))
+    try {
+      const stored = localStorage.getItem('watchlist')
+      const watchList = stored ? JSON.parse(stored) : []
+      if (Array.isArray(watchList)) {
+        setInWatchlist(watchList.some(s => s.symbol === symbol))
+      }
+    } catch(e) {}
   }, [symbol])
 
   const toggleWatchlist = () => {
     if (!symbol) return
-    let watchList = JSON.parse(localStorage.getItem('watchlist') || '[]')
+    let watchList = []
+    try {
+      const stored = localStorage.getItem('watchlist')
+      const parsed = stored ? JSON.parse(stored) : []
+      if (Array.isArray(parsed)) watchList = parsed
+    } catch(e) {}
+
     if (inWatchlist) {
       watchList = watchList.filter(s => s.symbol !== symbol)
     } else {
@@ -34,8 +45,8 @@ export default function StockHeader({ data }) {
   const stats = [
     { label: 'Market Cap',    value: fmt.money(q.marketCap || p.marketCap) },
     { label: 'Volume',        value: fmt.compact(q.volume || p.volume) },
-    { label: '52W High',      value: fmt.price(q.yearHigh || p.range?.split('-')[1]) },
-    { label: '52W Low',       value: fmt.price(q.yearLow || p.range?.split('-')[0]) },
+    { label: '52W High',      value: fmt.price(q.yearHigh || p.range?.split('-')?.[1]) },
+    { label: '52W Low',       value: fmt.price(q.yearLow || p.range?.split('-')?.[0]) },
     { label: 'P/E (TTM)',     value: fmt.multiple(rt.priceToEarningsRatioTTM) },
     { label: 'EV/EBITDA',     value: fmt.multiple(rt.enterpriseValueMultipleTTM) },
     { label: 'Div Yield',     value: fmt.pct(rt.dividendYieldTTM) },

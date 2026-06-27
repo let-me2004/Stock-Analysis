@@ -28,7 +28,11 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
 
   useEffect(() => {
     try {
-      setWatchlist(JSON.parse(localStorage.getItem('watchlist') || '[]'))
+      const stored = localStorage.getItem('watchlist')
+      const parsed = stored ? JSON.parse(stored) : []
+      if (Array.isArray(parsed)) {
+        setWatchlist(parsed)
+      }
     } catch(e) {}
   }, [])
   const [activePillar, setActivePillar] = useState(null)
