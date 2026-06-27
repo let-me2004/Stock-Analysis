@@ -1,12 +1,5 @@
 import { useSWOT } from '../../hooks/useStock'
 
-const icons = {
-  strengths: '💪',
-  weaknesses: '⚠️',
-  opportunities: '🚀',
-  threats: '🛡️',
-}
-
 export default function SWOTAnalysis({ ticker, data }) {
   const { swot, loading } = useSWOT(ticker, data)
 
@@ -30,7 +23,6 @@ export default function SWOTAnalysis({ ticker, data }) {
             {['strengths', 'weaknesses', 'opportunities', 'threats'].map((key) => (
               <div key={key} className={`swot-cell ${key}`}>
                 <div className="swot-cell-header">
-                  <span>{icons[key]}</span>
                   {key.charAt(0).toUpperCase() + key.slice(1)}
                 </div>
                 <ul className="swot-list">
