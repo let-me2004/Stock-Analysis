@@ -5,10 +5,16 @@ import { ProxyAgent } from 'undici'
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] })
 
 if (process.env.PROXY_URL) {
-  if (!yahooFinance._opts.fetchOptions) {
-    yahooFinance._opts.fetchOptions = {}
+  try {
+    let proxyUrl = process.env.PROXY_URL.trim().replace(/^["']|["']$/g, '')
+    if (!yahooFinance._opts.fetchOptions) {
+      yahooFinance._opts.fetchOptions = {}
+    }
+    yahooFinance._opts.fetchOptions.dispatcher = new ProxyAgent(proxyUrl)
+    console.log('Successfully configured yahoo-finance2 proxy')
+  } catch (error) {
+    console.error('Failed to configure proxy:', error.message)
   }
-  yahooFinance._opts.fetchOptions.dispatcher = new ProxyAgent(process.env.PROXY_URL)
 }
 
 // Helper to fetch fundamentalsTimeSeries for a specific module
