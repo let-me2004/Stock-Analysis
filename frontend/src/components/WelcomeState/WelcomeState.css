@@ -1,3 +1,3 @@
 /* WelcomeState styles are now part of the global index.css design system.
    All .ws-* classes are defined there under the Invega Analytics theme. */
-.ws-bg-animation { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 1; }
+

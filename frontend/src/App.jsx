@@ -20,6 +20,7 @@ import StockHistory from './components/sections/StockHistory'
 import MarketIntelligence from './components/sections/MarketIntelligence/MarketIntelligence'
 import WelcomeState from './components/WelcomeState/WelcomeState'
 import SplashCurtain from './components/SplashCurtain/SplashCurtain'
+import LineWaves from './components/LineWaves/LineWaves'
 import { useStock } from './hooks/useStock'
 import { exportToPDF } from './utils/pdfExport'
 
@@ -88,9 +89,28 @@ export default function App() {
 
   return (
     <div className="app-root">
+      {!ticker && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 1 }}>
+          <LineWaves
+            speed={0.2}
+            innerLineCount={25}
+            outerLineCount={30}
+            warpIntensity={1.2}
+            rotation={0}
+            edgeFadeWidth={0.2}
+            colorCycleSpeed={0.5}
+            brightness={0.15}
+            color1="#ffffff"
+            color2="#aaaaaa"
+            color3="#555555"
+            enableMouseInteraction={true}
+            mouseInfluence={2.5}
+          />
+        </div>
+      )}
       {!hasPassedCurtain && <SplashCurtain onComplete={() => setHasPassedCurtain(true)} />}
       <Header onSearch={handleSearch} onExport={handleExport} ticker={ticker} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="app-body">
+      <div className="app-body" style={{ position: 'relative', zIndex: 1 }}>
         <Sidebar currentTicker={ticker} onSelectTicker={handleSearch} isOpen={isSidebarOpen} />
         <main className={`main-content ${!ticker ? 'welcome-mode' : ''}`} ref={reportRef}>
           {!ticker && <WelcomeState onSearch={handleSearch} scrollContainerRef={reportRef} />}
