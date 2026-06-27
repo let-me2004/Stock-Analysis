@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://stock-analysis-6j25.onrender.com/api/:path*"
+      "destination": "https://stock-analysis-api-l6l2.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
