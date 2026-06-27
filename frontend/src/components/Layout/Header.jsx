@@ -72,7 +72,11 @@ export default function Header({ onSearch, onExport, ticker, onToggleSidebar }) 
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-        <div className="header-logo">
+        <div 
+          className="header-logo" 
+          onClick={() => onSearch('')} 
+          style={{ cursor: 'pointer' }}
+        >
           <div className="header-logo-icon">IV</div>
         <div>
           <div className="header-logo-text">Invega</div>
