@@ -24,6 +24,13 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [searching, setSearching] = useState(false)
+  const [watchlist, setWatchlist] = useState([])
+
+  useEffect(() => {
+    try {
+      setWatchlist(JSON.parse(localStorage.getItem('watchlist') || '[]'))
+    } catch(e) {}
+  }, [])
   const [activePillar, setActivePillar] = useState(null)
   
   const heroRef = useRef(null)
@@ -137,6 +144,30 @@ export default function WelcomeState({ onSearch, scrollContainerRef }) {
               </form>
             </div>
           </div>
+          
+          {watchlist.length > 0 && (
+            <div style={{ marginTop: 24, display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span style={{ fontSize: 12, color: 'var(--t-muted)', display: 'flex', alignItems: 'center', marginRight: 4 }}>WATCHLIST</span>
+              {watchlist.map(s => (
+                <div 
+                  key={s.symbol} 
+                  onClick={() => onSearch(s.symbol)}
+                  style={{ 
+                    padding: '4px 12px', background: 'rgba(255,255,255,0.03)', 
+                    borderRadius: 20, fontSize: 12, cursor: 'pointer',
+                    border: '1px solid var(--border)',
+                    color: 'var(--t-primary)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+                >
+                  {s.symbol}
+                </div>
+              ))}
+            </div>
+          )}
+
 
         </div>
       </div>

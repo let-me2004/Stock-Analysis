@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { fmt, changeClass } from '../../utils/formatters'
 
 export default function StockHeader({ data }) {
@@ -8,6 +9,27 @@ export default function StockHeader({ data }) {
 
   const change = q.changePercentage ?? p.changePercentage ?? 0
   const isUp = change >= 0
+
+  const symbol = p.symbol || q.symbol || ''
+  const [inWatchlist, setInWatchlist] = useState(false)
+
+  useEffect(() => {
+    if (!symbol) return
+    const watchList = JSON.parse(localStorage.getItem('watchlist') || '[]')
+    setInWatchlist(watchList.some(s => s.symbol === symbol))
+  }, [symbol])
+
+  const toggleWatchlist = () => {
+    if (!symbol) return
+    let watchList = JSON.parse(localStorage.getItem('watchlist') || '[]')
+    if (inWatchlist) {
+      watchList = watchList.filter(s => s.symbol !== symbol)
+    } else {
+      watchList.push({ symbol, name: p.companyName || q.name || symbol })
+    }
+    localStorage.setItem('watchlist', JSON.stringify(watchList))
+    setInWatchlist(!inWatchlist)
+  }
 
   const stats = [
     { label: 'Market Cap',    value: fmt.money(q.marketCap || p.marketCap) },
@@ -29,6 +51,20 @@ export default function StockHeader({ data }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <h1 className="stock-company-name">{p.companyName || q.name || '—'}</h1>
             <span className="stock-ticker-badge">{p.symbol || '—'}</span>
+            {symbol && (
+              <button 
+                className="btn btn-icon btn-ghost" 
+                onClick={toggleWatchlist}
+                title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  width: 28, height: 28, borderRadius: '50%', fontSize: 18, 
+                  background: inWatchlist ? 'rgba(255,255,255,0.1)' : 'transparent'
+                }}
+              >
+                {inWatchlist ? '✓' : '+'}
+              </button>
+            )}
           </div>
           <div className="stock-meta" style={{ marginTop: 6 }}>
             <span className="stock-meta-item">{p.exchangeShortName} · {p.currency}</span>
