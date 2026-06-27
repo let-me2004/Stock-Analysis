@@ -1,42 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import './SplashCurtain.css';
 
 export default function SplashCurtain({ onComplete }) {
-  const [scrollY, setScrollY] = useState(0);
   const controls = useAnimation();
-  const [isTearing, setIsTearing] = useState(false);
+  const isTearingRef = useRef(false);
 
   useEffect(() => {
-    const handleScroll = (e) => {
-      if (isTearing) return;
+    const triggerRip = () => {
+      if (isTearingRef.current) return;
+      isTearingRef.current = true;
       
-      // Accumulate scroll delta
-      const newY = Math.min(Math.max(scrollY + e.deltaY, 0), window.innerHeight);
-      setScrollY(newY);
+      controls.start({
+        y: "-100vh",
+        transition: { type: "spring", stiffness: 120, damping: 14, mass: 0.5 }
+      }).then(() => {
+        onComplete();
+      });
+    };
 
-      // If user scrolls past 20% of the screen height, rip the curtain up
-      if (newY > window.innerHeight * 0.2) {
-        setIsTearing(true);
-        controls.start({
-          y: "-100vh",
-          transition: { type: "spring", stiffness: 120, damping: 14, mass: 0.5 }
-        }).then(() => {
-          onComplete(); // Tell App.jsx we're done so it unmounts
-        });
+    const handleScroll = (e) => {
+      // Trigger on any decent sized scroll wheel movement
+      if (Math.abs(e.deltaY) > 5) {
+        triggerRip();
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e) => { touchStartY = e.touches[0].clientY; };
+    const handleTouchMove = (e) => {
+      const deltaY = touchStartY - e.touches[0].clientY;
+      // Trigger on any decent sized swipe
+      if (Math.abs(deltaY) > 10) {
+        triggerRip();
       }
     };
 
     window.addEventListener('wheel', handleScroll, { passive: false });
-    // Handle touch for mobile
-    let touchStartY = 0;
-    const handleTouchStart = (e) => { touchStartY = e.touches[0].clientY; };
-    const handleTouchMove = (e) => {
-      if (isTearing) return;
-      const deltaY = touchStartY - e.touches[0].clientY;
-      handleScroll({ deltaY });
-      touchStartY = e.touches[0].clientY;
-    };
     window.addEventListener('touchstart', handleTouchStart);
     window.addEventListener('touchmove', handleTouchMove);
 
@@ -45,16 +45,12 @@ export default function SplashCurtain({ onComplete }) {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [scrollY, isTearing, controls, onComplete]);
-
-  // While not ripping, transform based on raw scroll amount (max 20% up)
-  const currentY = isTearing ? undefined : -scrollY;
+  }, [controls, onComplete]);
 
   return (
     <motion.div 
       className="splash-curtain"
       animate={controls}
-      style={{ y: currentY }}
     >
       <div className="splash-content">
         <h1 className="splash-title">INVEGA ANALYTICS</h1>
