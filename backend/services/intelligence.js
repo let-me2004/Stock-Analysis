@@ -32,35 +32,7 @@ async function exaSearch(query, numResults = 5) {
   }
 }
 
-// ── Build financial news search URLs for a ticker ───────────────────────────
-function newsUrls(ticker) {
-  const clean = ticker.replace(/\.NS$|\.BO$|\.L$|\.TO$/, '')
-  return [
-    `https://finance.yahoo.com/quote/${ticker}/news/`,
-    `https://finviz.com/quote.ashx?t=${clean}`,
-    `https://www.marketwatch.com/investing/stock/${clean.toLowerCase()}`,
-  ]
-}
-
-// ── Scrape financial news articles about a ticker ───────────────────────────
-export async function getFinancialNews(ticker) {
-  const urls = newsUrls(ticker)
-  const results = []
-
-  for (const url of urls.slice(0, 2)) {
-    const text = await jinaFetch(url)
-    if (text && text.length > 200) {
-      results.push({
-        source: new URL(url).hostname.replace('www.', ''),
-        url,
-        content: text.slice(0, 2000),
-        fetchedAt: new Date().toISOString(),
-      })
-    }
-  }
-
-  return results
-}
+export { getFinancialNews } from './yf.js'
 
 // ── Exa semantic search for stock-related content ───────────────────────────
 export async function getExaResults(ticker) {

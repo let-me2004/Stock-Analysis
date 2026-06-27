@@ -372,6 +372,22 @@ export async function searchTickers(query) {
   }
 }
 
+export async function getFinancialNews(ticker) {
+  try {
+    const res = await yahooFinance.search(ticker, { newsCount: 10, quotesCount: 0 })
+    return (res.news || []).map(n => ({
+      source: n.publisher || 'Yahoo Finance',
+      url: n.link,
+      title: n.title,
+      content: n.title, // Use title as fallback snippet
+      fetchedAt: n.providerPublishTime ? new Date(n.providerPublishTime).toISOString() : new Date().toISOString()
+    }))
+  } catch (err) {
+    console.error("YF news error:", err.message)
+    return []
+  }
+}
+
 export async function getPeerDetails(peerTickers) {
   const results = await Promise.allSettled(
     peerTickers.slice(0, 5).map(async (t) => {
